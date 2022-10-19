@@ -16,7 +16,7 @@ export class TrashRoot {
 	private async buildItems(trashedFiles: ListedFiles): Promise<TrashItem[]> {
 		const items = [];
 
-		for (const path of trashedFiles.folders) {
+		for (const path of trashedFiles.folders.sort(this.compareName)) {
 			const files = await this.vault.adapter.list(path);
 			const children = await this.buildItems(files);
 
@@ -24,13 +24,19 @@ export class TrashRoot {
 			items.push(trashedFolder);
 		}
 
-		for (const path of trashedFiles.files) {
+		for (const path of trashedFiles.files.sort(this.compareName)) {
 			const trashedFile = new TrashedFile(this.vault, path);
 			items.push(trashedFile);
 		}
 
 		return items;
 	}
+
+	private readonly collator = new Intl.Collator(undefined, {
+		sensitivity: "base",
+	});
+	private readonly compareName = (a: string, b: string) =>
+		this.collator.compare(a, b);
 }
 
 abstract class TrashedBase {
