@@ -108,6 +108,7 @@ export class TrashExplorerView extends ItemView {
 				this.app,
 				title,
 				message,
+				"Delete",
 				async () => {
 					await item.remove();
 
@@ -122,11 +123,12 @@ export class TrashExplorerView extends ItemView {
 	}
 }
 
-class ConfirmModal extends Modal {
+export class ConfirmModal extends Modal {
 	constructor(
 		app: App,
 		private readonly title: string,
 		private readonly message: string,
+		private readonly submitText: string,
 		private readonly onSubmit: () => void
 	) {
 		super(app);
@@ -142,7 +144,7 @@ class ConfirmModal extends Modal {
 		new Setting(this.contentEl)
 			.addButton((button) =>
 				button
-					.setButtonText("Delete")
+					.setButtonText(this.submitText)
 					.setWarning()
 					.onClick(() => {
 						this.onSubmit();

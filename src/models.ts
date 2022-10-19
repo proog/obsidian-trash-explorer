@@ -1,6 +1,8 @@
 import { ListedFiles, Vault } from "obsidian";
 import { basename, dirname } from "path";
 
+export const TRASH_ROOT = ".trash";
+
 export type TrashItem = TrashedFile | TrashedFolder;
 
 export class TrashRoot {
@@ -9,8 +11,20 @@ export class TrashRoot {
 	constructor(private readonly vault: Vault) {}
 
 	async refresh(): Promise<void> {
-		const trashedFiles = await this.vault.adapter.list(".trash");
-		this.items = await this.buildItems(trashedFiles);
+		if (await this.vault.adapter.exists(TRASH_ROOT)) {
+			const trashedFiles = await this.vault.adapter.list(TRASH_ROOT);
+			this.items = await this.buildItems(trashedFiles);
+		} else {
+			this.items = [];
+		}
+	}
+
+	async empty(): Promise<void> {
+		if (await this.vault.adapter.exists(TRASH_ROOT)) {
+			await this.vault.adapter.rmdir(TRASH_ROOT, true);
+		}
+
+		this.items = [];
 	}
 
 	private async buildItems(trashedFiles: ListedFiles): Promise<TrashItem[]> {
@@ -45,7 +59,10 @@ abstract class TrashedBase {
 	constructor(readonly vault: Vault, readonly path: string) {}
 
 	async restore(): Promise<boolean> {
-		const restorePath = this.path.replace(/^.trash\//, "");
+		const restorePath = this.path.replace(
+			new RegExp(`^${TRASH_ROOT}/`),
+			""
+		);
 
 		if (await this.vault.adapter.exists(restorePath)) {
 			return false;

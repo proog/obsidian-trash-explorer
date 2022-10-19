@@ -1,6 +1,6 @@
-import { Plugin } from "obsidian";
-import { TrashRoot } from "./models";
-import { TrashExplorerView, VIEW_TYPE } from "./view";
+import { Notice, Plugin } from "obsidian";
+import { TrashRoot, TRASH_ROOT } from "./models";
+import { ConfirmModal, TrashExplorerView, VIEW_TYPE } from "./view";
 
 export default class TrashExplorerPlugin extends Plugin {
 	private trash: TrashRoot;
@@ -14,9 +14,9 @@ export default class TrashExplorerPlugin extends Plugin {
 			(leaf) => new TrashExplorerView(leaf, this.trash)
 		);
 
-		this.addRibbonIcon("trash", "Open trash explorer", async () => {
-			this.activateView();
-		});
+		this.addRibbonIcon("trash", "Open trash explorer", () =>
+			this.activateView()
+		);
 
 		this.addCommand({
 			id: "show-trash-explorer",
@@ -24,18 +24,17 @@ export default class TrashExplorerPlugin extends Plugin {
 			callback: () => this.activateView(),
 		});
 
+		this.addCommand({
+			id: "empty-trash",
+			name: "Empty trash",
+			callback: () => this.emptyTrash(),
+		});
+
 		// Refresh trash explorer when a file is deleted
 		this.registerEvent(
 			this.app.vault.on("delete", async () => {
 				await this.trash.refresh();
-
-				const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE);
-
-				for (const leaf of leaves) {
-					if (leaf.view instanceof TrashExplorerView) {
-						await leaf.view.refresh();
-					}
-				}
+				await this.refreshOpenLeaves();
 			})
 		);
 	}
@@ -57,5 +56,39 @@ export default class TrashExplorerPlugin extends Plugin {
 		await (leaf.view as TrashExplorerView).refresh();
 
 		this.app.workspace.revealLeaf(leaf);
+	}
+
+	private async refreshOpenLeaves() {
+		const leaves = this.app.workspace.getLeavesOfType(VIEW_TYPE);
+
+		for (const leaf of leaves) {
+			if (leaf.view instanceof TrashExplorerView) {
+				await leaf.view.refresh();
+			}
+		}
+	}
+
+	private emptyTrash() {
+		const title = "Empty trash";
+		const message = `Are you sure you want to empty the trash? All files in the "${TRASH_ROOT}" folder will be permanently deleted!`;
+
+		return new Promise<void>((resolve) => {
+			const confirmModal = new ConfirmModal(
+				this.app,
+				title,
+				message,
+				"Empty trash",
+				async () => {
+					await this.trash.empty();
+					await this.refreshOpenLeaves();
+
+					new Notice(`Emptied the trash`);
+					confirmModal.close();
+					resolve();
+				}
+			);
+
+			confirmModal.open();
+		});
 	}
 }
