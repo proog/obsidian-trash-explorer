@@ -1,12 +1,12 @@
 import { Plugin } from "obsidian";
-import { Trash } from "Trash";
-import { TrashExplorerView, VIEW_TYPE } from "./TrashExplorerView";
+import { TrashRoot } from "./models";
+import { TrashExplorerView, VIEW_TYPE } from "./view";
 
 export default class TrashExplorerPlugin extends Plugin {
-	private trash: Trash;
+	private trash: TrashRoot;
 
 	async onload() {
-		this.trash = new Trash(this.app.vault);
+		this.trash = new TrashRoot(this.app.vault);
 		await this.trash.refresh();
 
 		this.registerView(

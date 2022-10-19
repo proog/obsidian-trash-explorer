@@ -1,7 +1,13 @@
-import { ButtonComponent, ItemView, Notice, WorkspaceLeaf } from "obsidian";
-import { Trash } from "Trash";
-import { ConfirmModal } from "./ConfirmModal";
-import { TrashItem } from "./TrashItem";
+import {
+	App,
+	ButtonComponent,
+	ItemView,
+	Modal,
+	Notice,
+	Setting,
+	WorkspaceLeaf,
+} from "obsidian";
+import { TrashItem, TrashRoot } from "./models";
 
 export const VIEW_TYPE = "trash-explorer";
 
@@ -9,7 +15,7 @@ export class TrashExplorerView extends ItemView {
 	icon = "trash";
 	navigation = false;
 
-	constructor(leaf: WorkspaceLeaf, private readonly trash: Trash) {
+	constructor(leaf: WorkspaceLeaf, private readonly trash: TrashRoot) {
 		super(leaf);
 	}
 
@@ -36,7 +42,7 @@ export class TrashExplorerView extends ItemView {
 			const itemContainer = container.createEl("div");
 			this.renderItem(item, itemContainer);
 
-			if (item.isFolder) {
+			if (item.kind === "folder") {
 				const nestedContainer = itemContainer.createEl("div");
 				nestedContainer.style.paddingLeft = "1em";
 				await this.renderItems(item.children, nestedContainer);
@@ -94,7 +100,7 @@ export class TrashExplorerView extends ItemView {
 	}
 
 	private async deleteFile(item: TrashItem): Promise<boolean> {
-		const title = item.isFolder ? "Delete folder" : "Delete file";
+		const title = item.kind === "folder" ? "Delete folder" : "Delete file";
 		const message = `Are you sure you want to permanently delete "${item.basename}"?`;
 
 		return new Promise<boolean>((resolve) => {
@@ -113,5 +119,44 @@ export class TrashExplorerView extends ItemView {
 
 			confirmModal.open();
 		});
+	}
+}
+
+class ConfirmModal extends Modal {
+	constructor(
+		app: App,
+		private readonly title: string,
+		private readonly message: string,
+		private readonly onSubmit: () => void
+	) {
+		super(app);
+	}
+
+	onOpen(): void {
+		this.titleEl.setText(this.title);
+
+		this.contentEl.createEl("p", {
+			text: this.message,
+		});
+
+		new Setting(this.contentEl)
+			.addButton((button) =>
+				button
+					.setButtonText("Delete")
+					.setWarning()
+					.onClick(() => {
+						this.onSubmit();
+						this.close();
+					})
+			)
+			.addButton((button) =>
+				button.setButtonText("Cancel").onClick(() => {
+					this.close();
+				})
+			);
+	}
+
+	onClose(): void {
+		this.contentEl.empty();
 	}
 }
