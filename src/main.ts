@@ -18,6 +18,12 @@ export default class TrashExplorerPlugin extends Plugin {
 			this.activateView();
 		});
 
+		this.addCommand({
+			id: "show-trash-explorer",
+			name: "Show trash explorer",
+			callback: () => this.activateView(),
+		});
+
 		// Refresh trash explorer when a file is deleted
 		this.registerEvent(
 			this.app.vault.on("delete", async () => {
