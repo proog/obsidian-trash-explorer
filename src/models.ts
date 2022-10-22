@@ -72,7 +72,11 @@ abstract class TrashedBase {
 		}
 
 		const restoreParentDir = dirname(restorePath);
-		await this.vault.adapter.mkdir(restoreParentDir);
+
+		if (!(await this.vault.adapter.exists(restoreParentDir))) {
+			await this.vault.adapter.mkdir(restoreParentDir);
+		}
+
 		await this.vault.adapter.rename(this.path, restorePath);
 
 		return true;
