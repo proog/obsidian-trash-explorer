@@ -1,7 +1,7 @@
 {
 	"name": "obsidian-trash-explorer",
 	"version": "1.0.0",
-	"description": "This is a sample plugin for Obsidian (https://obsidian.md)",
+	"description": "Restore and delete files from the Obsidian .trash folder",
 	"main": "main.js",
 	"scripts": {
 		"dev": "node esbuild.config.mjs",
@@ -10,7 +10,7 @@
 		"test": "vitest"
 	},
 	"keywords": [],
-	"author": "",
+	"author": "Per Mortensen <per@permortensen.com>",
 	"license": "MIT",
 	"devDependencies": {
 		"@types/node": "^16.11.6",
