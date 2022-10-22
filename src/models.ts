@@ -1,5 +1,5 @@
 import { ListedFiles, Vault } from "obsidian";
-import { basename, dirname } from "path";
+import { basename, dirname } from "./path";
 
 export const TRASH_ROOT = ".trash";
 
@@ -59,10 +59,7 @@ abstract class TrashedBase {
 	constructor(readonly vault: Vault, readonly path: string) {}
 
 	async restore(): Promise<boolean> {
-		const restorePath = this.path.replace(
-			new RegExp(`^${TRASH_ROOT}/`),
-			""
-		);
+		const restorePath = this.path.replace(`${TRASH_ROOT}/`, "");
 
 		if (await this.vault.adapter.exists(restorePath)) {
 			return false;
