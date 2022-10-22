@@ -15,3 +15,5 @@ Items are restored to a vault location matching their location in the trash. For
 ## Limitations
 
 This plugin is at the mercy of where Obsidian places trashed items, as it has no access to their original location. In particular, Obsidian always moves items to the root of the `.trash` folder, regardless of their parent folder structure, so any parent folders will not be preserved when restoring. For instance, trashing the file `Recipes/Belgian waffles.md` will move it to `.trash/Belgian waffles.md`, and restoring it will move it to `Belgian waffles.md` in the root of the vault.
+
+As of October 2022, the Obsidian mobile app seems to add a dot at the end of folder names when trashing them. This is not related to this plugin.
