@@ -5,41 +5,56 @@ export const TRASH_ROOT = normalizePath(".trash");
 
 export type TrashItem = TrashedFile | TrashedFolder;
 
-export class TrashRoot {
-	items: TrashItem[] = [];
+export class Trash {
+	private readonly root = new TrashedFolder(this.vault, TRASH_ROOT, null);
 
 	constructor(private readonly vault: Vault) {}
 
+	get items(): TrashItem[] {
+		return this.root.children;
+	}
+
+	get isEmpty(): boolean {
+		return this.root.isEmpty;
+	}
+
 	async refresh(): Promise<void> {
-		if (await this.vault.adapter.exists(TRASH_ROOT)) {
-			const trashedFiles = await this.vault.adapter.list(TRASH_ROOT);
-			this.items = await this.buildItems(trashedFiles);
+		if (await this.vault.adapter.exists(this.root.path)) {
+			const trashedFiles = await this.vault.adapter.list(this.root.path);
+			this.root.children = await this.buildItems(trashedFiles, this.root);
 		} else {
-			this.items = [];
+			this.root.children = [];
 		}
 	}
 
 	async empty(): Promise<void> {
-		if (await this.vault.adapter.exists(TRASH_ROOT)) {
-			await this.vault.adapter.rmdir(TRASH_ROOT, true);
+		if (await this.vault.adapter.exists(this.root.path)) {
+			await this.root.remove();
 		}
 
-		this.items = [];
+		this.root.children = [];
 	}
 
-	private async buildItems(trashedFiles: ListedFiles): Promise<TrashItem[]> {
+	private async buildItems(
+		trashedFiles: ListedFiles,
+		parent: TrashedFolder | null
+	): Promise<TrashItem[]> {
 		const items = [];
 
 		for (const path of trashedFiles.folders.sort(this.compareName)) {
 			const files = await this.vault.adapter.list(path);
-			const children = await this.buildItems(files);
 
-			const trashedFolder = new TrashedFolder(this.vault, path, children);
+			const trashedFolder = new TrashedFolder(this.vault, path, parent);
 			items.push(trashedFolder);
+
+			trashedFolder.children = await this.buildItems(
+				files,
+				trashedFolder
+			);
 		}
 
 		for (const path of trashedFiles.files.sort(this.compareName)) {
-			const trashedFile = new TrashedFile(this.vault, path);
+			const trashedFile = new TrashedFile(this.vault, path, parent);
 			items.push(trashedFile);
 		}
 
@@ -57,12 +72,16 @@ abstract class TrashedBase {
 	readonly path: string;
 	readonly basename: string;
 
-	constructor(readonly vault: Vault, path: string) {
+	constructor(
+		readonly vault: Vault,
+		path: string,
+		readonly parent: TrashedFolder | null
+	) {
 		this.path = normalizePath(path);
 		this.basename = basename(this.path);
 	}
 
-	async restore(): Promise<boolean> {
+	protected async restore(): Promise<boolean> {
 		const restorePath = normalizePath(
 			this.path.replace(`${TRASH_ROOT}/`, "")
 		);
@@ -88,19 +107,51 @@ abstract class TrashedBase {
 class TrashedFile extends TrashedBase {
 	readonly kind = "file";
 
+	async restore(): Promise<boolean> {
+		const restored = await super.restore();
+
+		if (restored) {
+			this.parent?.removeChild(this);
+		}
+
+		return restored;
+	}
+
 	async remove(): Promise<void> {
 		await this.vault.adapter.remove(this.path);
+		this.parent?.removeChild(this);
 	}
 }
 
 class TrashedFolder extends TrashedBase {
 	readonly kind = "folder";
 
-	constructor(vault: Vault, path: string, readonly children: TrashItem[]) {
-		super(vault, path);
+	children: TrashItem[] = [];
+
+	get isEmpty(): boolean {
+		return this.children.length === 0;
+	}
+
+	async restore(): Promise<boolean> {
+		const restored = await super.restore();
+
+		if (restored) {
+			this.parent?.removeChild(this);
+		}
+
+		return restored;
 	}
 
 	async remove(): Promise<void> {
 		await this.vault.adapter.rmdir(this.path, true);
+		this.parent?.removeChild(this);
+	}
+
+	removeChild(child: TrashItem): void {
+		const index = this.children.indexOf(child);
+
+		if (index !== -1) {
+			this.children.splice(index, 1);
+		}
 	}
 }

@@ -7,7 +7,7 @@ import {
 	Setting,
 	WorkspaceLeaf,
 } from "obsidian";
-import { TrashItem, TrashRoot } from "./models";
+import { Trash, TrashItem } from "./models";
 
 export const VIEW_TYPE = "trash-explorer";
 
@@ -15,7 +15,7 @@ export class TrashExplorerView extends ItemView {
 	icon = "trash";
 	navigation = false;
 
-	constructor(leaf: WorkspaceLeaf, private readonly trash: TrashRoot) {
+	constructor(leaf: WorkspaceLeaf, private readonly trash: Trash) {
 		super(leaf);
 	}
 
@@ -31,13 +31,25 @@ export class TrashExplorerView extends ItemView {
 		await this.refresh();
 	}
 
-	async refresh() {
+	async refresh(): Promise<void> {
 		const container = this.contentEl;
 		container.empty();
+
+		if (this.trash.isEmpty) {
+			this.renderEmptyMessage(container);
+		}
+
 		this.renderItems(this.trash.items, container);
 	}
 
-	private async renderItems(items: TrashItem[], container: Element) {
+	private renderEmptyMessage(container: HTMLElement): void {
+		container.createEl("div", {
+			cls: "pane-empty",
+			text: "The trash is empty.",
+		});
+	}
+
+	private renderItems(items: TrashItem[], container: Element): void {
 		for (const item of items) {
 			const itemContainer = container.createEl("div");
 			this.renderItem(item, itemContainer);
@@ -45,12 +57,12 @@ export class TrashExplorerView extends ItemView {
 			if (item.kind === "folder") {
 				const nestedContainer = itemContainer.createEl("div");
 				nestedContainer.style.paddingLeft = "1em";
-				await this.renderItems(item.children, nestedContainer);
+				this.renderItems(item.children, nestedContainer);
 			}
 		}
 	}
 
-	private renderItem(item: TrashItem, container: Element) {
+	private renderItem(item: TrashItem, container: Element): void {
 		const el = container.createEl("div", {
 			cls: "trash-item",
 		});
@@ -69,7 +81,7 @@ export class TrashExplorerView extends ItemView {
 		restoreButton.setTooltip("Restore");
 		restoreButton.onClick(async () => {
 			if (await this.restoreFile(item)) {
-				container.remove();
+				this.refresh();
 			}
 		});
 
@@ -79,11 +91,9 @@ export class TrashExplorerView extends ItemView {
 		deleteButton.setWarning();
 		deleteButton.onClick(async () => {
 			if (await this.deleteFile(item)) {
-				container.remove();
+				this.refresh();
 			}
 		});
-
-		return el;
 	}
 
 	private async restoreFile(item: TrashItem): Promise<boolean> {

@@ -1,12 +1,12 @@
 import { Notice, Plugin } from "obsidian";
-import { TrashRoot, TRASH_ROOT } from "./models";
+import { Trash, TRASH_ROOT } from "./models";
 import { ConfirmModal, TrashExplorerView, VIEW_TYPE } from "./view";
 
 export default class TrashExplorerPlugin extends Plugin {
-	private trash: TrashRoot;
+	private trash: Trash;
 
 	async onload() {
-		this.trash = new TrashRoot(this.app.vault);
+		this.trash = new Trash(this.app.vault);
 		await this.trash.refresh();
 
 		this.registerView(
