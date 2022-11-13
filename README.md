@@ -2,6 +2,8 @@
 
 A plugin for [Obsidian](https://obsidian.md) that makes it possible to list, restore, and delete files in the _.trash_ folder in your Obsidian vault. This is useful if you're having trouble accessing hidden folders, such as on iOS.
 
+![Screenshot of the trash explorer view](https://github.com/proog/obsidian-trash-explorer/raw/main/screenshot.png)
+
 ## Usage
 
 > **Important:** this plugin works only with Obsidian's own _.trash_ folder. It does not work with the system trash.
