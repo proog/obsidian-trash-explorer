@@ -44,14 +44,18 @@ export default class TrashExplorerPlugin extends Plugin {
 	}
 
 	private async activateView() {
-		this.app.workspace.detachLeavesOfType(VIEW_TYPE);
+		let leaf = this.app.workspace.getLeavesOfType(VIEW_TYPE)[0];
 
-		await this.app.workspace.getLeftLeaf(false).setViewState({
-			type: VIEW_TYPE,
-			active: true,
-		});
+		// Open a new leaf if it's not already open
+		if (!leaf) {
+			await this.app.workspace.getLeftLeaf(false).setViewState({
+				type: VIEW_TYPE,
+				active: true,
+			});
 
-		const leaf = this.app.workspace.getLeavesOfType(VIEW_TYPE)[0];
+			leaf = this.app.workspace.getLeavesOfType(VIEW_TYPE)[0];
+		}
+
 		await this.trash.refresh();
 		await (leaf.view as TrashExplorerView).refresh();
 
