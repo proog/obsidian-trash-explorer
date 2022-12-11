@@ -14,6 +14,7 @@ export const VIEW_TYPE = "trash-explorer";
 export class TrashExplorerView extends ItemView {
 	icon = "trash";
 	navigation = false;
+	private readonly infoFormatter = new InfoFormatter();
 
 	constructor(leaf: WorkspaceLeaf, private readonly trash: Trash) {
 		super(leaf);
@@ -67,9 +68,17 @@ export class TrashExplorerView extends ItemView {
 			cls: "trash-item",
 		});
 
-		el.createEl("div", {
-			cls: "trash-item__text",
+		const textContainer = el.createEl("div", {
+			cls: "trash-item__textcontainer",
+		});
+
+		textContainer.createEl("div", {
+			cls: "trash-item__name",
 			text: item.basename,
+		});
+		textContainer.createEl("div", {
+			cls: "trash-item__info",
+			text: this.infoFormatter.getInfo(item),
 		});
 
 		const buttons = el.createEl("div", {
@@ -170,5 +179,27 @@ export class ConfirmModal extends Modal {
 
 	onClose(): void {
 		this.contentEl.empty();
+	}
+}
+
+class InfoFormatter {
+	private readonly units = [
+		{ size: 0, name: "B", digits: 0 },
+		{ size: 1024, name: "KB", digits: 1 },
+		{ size: 1024 * 1024, name: "MB", digits: 1 },
+		{ size: 1024 * 1024 * 1024, name: "GB", digits: 1 },
+	];
+
+	getInfo(item: TrashItem): string {
+		if (item.kind === "folder") {
+			return `${item.children.length} items`;
+		}
+
+		const bestUnit = this.units.reduce((best, unit) =>
+			item.size >= unit.size ? unit : best
+		);
+
+		const displaySize = item.size / (bestUnit.size || 1);
+		return `${displaySize.toFixed(bestUnit.digits)} ${bestUnit.name}`;
 	}
 }

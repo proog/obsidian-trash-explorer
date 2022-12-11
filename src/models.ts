@@ -1,4 +1,4 @@
-import { ListedFiles, normalizePath, Vault } from "obsidian";
+import { ListedFiles, normalizePath, Stat, Vault } from "obsidian";
 import { basename, dirname } from "./path";
 
 export const TRASH_ROOT = normalizePath(".trash");
@@ -6,7 +6,12 @@ export const TRASH_ROOT = normalizePath(".trash");
 export type TrashItem = TrashedFile | TrashedFolder;
 
 export class Trash {
-	private readonly root = new TrashedFolder(this.vault, TRASH_ROOT, null);
+	private readonly root = new TrashedFolder(
+		this.vault,
+		TRASH_ROOT,
+		null,
+		null
+	);
 
 	constructor(private readonly vault: Vault) {}
 
@@ -44,7 +49,13 @@ export class Trash {
 		for (const path of trashedFiles.folders.sort(this.compareName)) {
 			const files = await this.vault.adapter.list(path);
 
-			const trashedFolder = new TrashedFolder(this.vault, path, parent);
+			const stat = await this.vault.adapter.stat(path);
+			const trashedFolder = new TrashedFolder(
+				this.vault,
+				path,
+				stat,
+				parent
+			);
 			items.push(trashedFolder);
 
 			trashedFolder.children = await this.buildItems(
@@ -54,7 +65,8 @@ export class Trash {
 		}
 
 		for (const path of trashedFiles.files.sort(this.compareName)) {
-			const trashedFile = new TrashedFile(this.vault, path, parent);
+			const stat = await this.vault.adapter.stat(path);
+			const trashedFile = new TrashedFile(this.vault, path, stat, parent);
 			items.push(trashedFile);
 		}
 
@@ -71,14 +83,17 @@ export class Trash {
 abstract class TrashedBase {
 	readonly path: string;
 	readonly basename: string;
+	readonly size: number;
 
 	constructor(
 		readonly vault: Vault,
 		path: string,
+		stat: Stat | null,
 		readonly parent: TrashedFolder | null
 	) {
 		this.path = normalizePath(path);
 		this.basename = basename(this.path);
+		this.size = stat?.size || 0;
 	}
 
 	protected async restore(): Promise<boolean> {
