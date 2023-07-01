@@ -2,6 +2,8 @@
 
 A plugin for [Obsidian](https://obsidian.md) that makes it possible to list, restore, and delete files in the _.trash_ folder in your Obsidian vault. This is useful if you're having trouble accessing hidden folders, such as on iOS.
 
+[Install Trash Explorer from Obsidian community plugins.](https://obsidian.md/plugins?id=obsidian-trash-explorer)
+
 ![Screenshot of the trash explorer view](https://github.com/proog/obsidian-trash-explorer/raw/main/screenshot.png)
 
 ## Usage
@@ -17,5 +19,3 @@ Items are restored to a vault location matching their location in the trash. For
 ## Limitations
 
 This plugin is at the mercy of where Obsidian places trashed items, as it has no access to their original location. In particular, Obsidian always moves items to the root of the `.trash` folder, regardless of their parent folder structure, so any parent folders will not be preserved when restoring. For instance, trashing the file `Recipes/Belgian waffles.md` will move it to `.trash/Belgian waffles.md`, and restoring it will move it to `Belgian waffles.md` in the root of the vault.
-
-As of October 2022, the Obsidian mobile app seems to add a dot at the end of folder names when trashing them. This is not related to this plugin.
