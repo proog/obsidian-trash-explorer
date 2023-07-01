@@ -2,8 +2,11 @@
 	import { createEventDispatcher } from "svelte";
 	import { formatItemStats } from "../formatting";
 	import type { TrashItem } from "../models";
+	import type { TrashExplorerViewNode } from "../view";
 
-	export let item: TrashItem;
+	export let viewNode: TrashExplorerViewNode;
+
+	$: item = viewNode.item;
 	$: itemStats = formatItemStats(item);
 
 	const dispatch = createEventDispatcher<{
@@ -62,10 +65,10 @@
 	</div>
 </div>
 
-{#if item.kind === "folder"}
+{#if viewNode.nodes.length}
 	<div style="padding-left: 1em;">
-		{#each item.children as child}
-			<svelte:self item={child} on:restore on:delete />
+		{#each viewNode.nodes as childNode}
+			<svelte:self viewNode={childNode} on:restore on:delete />
 		{/each}
 	</div>
 {/if}

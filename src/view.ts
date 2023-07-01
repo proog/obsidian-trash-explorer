@@ -2,6 +2,11 @@ import { App, ItemView, Modal, Notice, Setting, WorkspaceLeaf } from "obsidian";
 import { Trash, type TrashItem } from "./models";
 import TrashView from "./views/TrashView.svelte";
 
+export type TrashExplorerViewNode = {
+	item: TrashItem;
+	nodes: TrashExplorerViewNode[];
+};
+
 export const VIEW_TYPE = "trash-explorer";
 
 export class TrashExplorerView extends ItemView {
