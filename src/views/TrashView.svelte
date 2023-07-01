@@ -41,22 +41,36 @@
 	}
 </script>
 
-{#if trash.isEmpty}
-	<div class="pane-empty">The trash is empty.</div>
-{:else}
-	<SearchInput placeholder="Filter by name..." bind:query={searchQuery} />
+<div class="container">
+	{#if trash.isEmpty}
+		<div class="pane-empty">The trash is empty.</div>
+	{:else}
+		<div>
+			<SearchInput
+				placeholder="Filter by name..."
+				bind:query={searchQuery}
+			/>
+		</div>
 
-	<div class="node-list">
-		{#each viewNodes as viewNode}
-			<TrashItemView {viewNode} on:restore on:delete />
-		{:else}
-			<div class="pane-empty">Filter matched no files.</div>
-		{/each}
-	</div>
-{/if}
+		<div class="node-list">
+			{#each viewNodes as viewNode}
+				<TrashItemView {viewNode} on:restore on:delete />
+			{:else}
+				<div class="pane-empty">Filter matched no files.</div>
+			{/each}
+		</div>
+	{/if}
+</div>
 
 <style>
+	.container {
+		height: 100%;
+		display: flex;
+		flex-direction: column;
+	}
+
 	.node-list {
 		margin-top: 1em;
+		overflow-y: auto;
 	}
 </style>
