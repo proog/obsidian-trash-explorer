@@ -80,6 +80,7 @@
 		font-weight: var(--nav-item-weight);
 		line-height: var(--line-height-tight);
 		padding: var(--nav-item-padding);
+		padding-left: 0;
 		padding-right: 0;
 		display: flex;
 		align-items: center;
