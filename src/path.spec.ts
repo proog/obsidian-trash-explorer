@@ -17,10 +17,12 @@ describe.each([
 	const nodePath = (await vi.importActual("path")) as typeof import("path");
 
 	test("dirname", () => {
+		expect(dirname).not.toBe(nodePath.dirname);
 		expect(dirname(input)).toBe(nodePath.dirname(input));
 	});
 
 	test("basename", () => {
+		expect(basename).not.toBe(nodePath.basename);
 		expect(basename(input)).toBe(nodePath.basename(input));
 	});
 });
