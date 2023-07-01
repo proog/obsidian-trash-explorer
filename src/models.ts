@@ -1,4 +1,4 @@
-import { ListedFiles, normalizePath, Stat, Vault } from "obsidian";
+import { Vault, normalizePath, type ListedFiles, type Stat } from "obsidian";
 import { basename, dirname } from "./path";
 
 export const TRASH_ROOT = normalizePath(".trash");

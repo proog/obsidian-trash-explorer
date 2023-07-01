@@ -1,20 +1,13 @@
-import {
-	App,
-	ButtonComponent,
-	ItemView,
-	Modal,
-	Notice,
-	Setting,
-	WorkspaceLeaf,
-} from "obsidian";
-import { Trash, TrashItem } from "./models";
+import { App, ItemView, Modal, Notice, Setting, WorkspaceLeaf } from "obsidian";
+import { Trash, type TrashItem } from "./models";
+import TrashView from "./views/TrashView.svelte";
 
 export const VIEW_TYPE = "trash-explorer";
 
 export class TrashExplorerView extends ItemView {
 	icon = "trash";
 	navigation = false;
-	private readonly infoFormatter = new InfoFormatter();
+	private component: TrashView | undefined;
 
 	constructor(leaf: WorkspaceLeaf, private readonly trash: Trash) {
 		super(leaf);
@@ -29,80 +22,32 @@ export class TrashExplorerView extends ItemView {
 	}
 
 	async onOpen(): Promise<void> {
+		this.component = new TrashView({
+			target: this.contentEl,
+			props: { trash: this.trash },
+		});
+
+		this.component.$on("restore", async (event) => {
+			if (await this.restoreFile(event.detail)) {
+				this.refresh();
+			}
+		});
+
+		this.component.$on("delete", async (event) => {
+			if (await this.deleteFile(event.detail)) {
+				this.refresh();
+			}
+		});
+
 		await this.refresh();
 	}
 
+	async onClose(): Promise<void> {
+		this.component?.$destroy();
+	}
+
 	async refresh(): Promise<void> {
-		const container = this.contentEl;
-		container.empty();
-
-		if (this.trash.isEmpty) {
-			this.renderEmptyMessage(container);
-		}
-
-		this.renderItems(this.trash.items, container);
-	}
-
-	private renderEmptyMessage(container: HTMLElement): void {
-		container.createEl("div", {
-			cls: "pane-empty",
-			text: "The trash is empty.",
-		});
-	}
-
-	private renderItems(items: TrashItem[], container: Element): void {
-		for (const item of items) {
-			const itemContainer = container.createEl("div");
-			this.renderItem(item, itemContainer);
-
-			if (item.kind === "folder") {
-				const nestedContainer = itemContainer.createEl("div");
-				nestedContainer.style.paddingLeft = "1em";
-				this.renderItems(item.children, nestedContainer);
-			}
-		}
-	}
-
-	private renderItem(item: TrashItem, container: Element): void {
-		const el = container.createEl("div", {
-			cls: "trash-item",
-		});
-
-		const textContainer = el.createEl("div", {
-			cls: "trash-item__textcontainer",
-		});
-
-		textContainer.createEl("div", {
-			cls: "trash-item__name",
-			text: item.basename,
-		});
-		textContainer.createEl("div", {
-			cls: "trash-item__info",
-			text: this.infoFormatter.getInfo(item),
-		});
-
-		const buttons = el.createEl("div", {
-			cls: "trash-item__buttons",
-		});
-
-		const restoreButton = new ButtonComponent(buttons);
-		restoreButton.setIcon("reset");
-		restoreButton.setTooltip("Restore");
-		restoreButton.onClick(async () => {
-			if (await this.restoreFile(item)) {
-				this.refresh();
-			}
-		});
-
-		const deleteButton = new ButtonComponent(buttons);
-		deleteButton.setIcon("trash");
-		deleteButton.setTooltip("Delete permanently");
-		deleteButton.setWarning();
-		deleteButton.onClick(async () => {
-			if (await this.deleteFile(item)) {
-				this.refresh();
-			}
-		});
+		this.component?.$set({ trash: this.trash });
 	}
 
 	private async restoreFile(item: TrashItem): Promise<boolean> {
@@ -179,27 +124,5 @@ export class ConfirmModal extends Modal {
 
 	onClose(): void {
 		this.contentEl.empty();
-	}
-}
-
-class InfoFormatter {
-	private readonly units = [
-		{ size: 0, name: "B", digits: 0 },
-		{ size: 1024, name: "KB", digits: 1 },
-		{ size: 1024 * 1024, name: "MB", digits: 1 },
-		{ size: 1024 * 1024 * 1024, name: "GB", digits: 1 },
-	];
-
-	getInfo(item: TrashItem): string {
-		if (item.kind === "folder") {
-			return `${item.children.length} items`;
-		}
-
-		const bestUnit = this.units.reduce((best, unit) =>
-			item.size >= unit.size ? unit : best
-		);
-
-		const displaySize = item.size / (bestUnit.size || 1);
-		return `${displaySize.toFixed(bestUnit.digits)} ${bestUnit.name}`;
 	}
 }
