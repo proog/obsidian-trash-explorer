@@ -17,27 +17,24 @@
 		items: TrashItem[],
 		filter: string
 	): TrashExplorerViewNode[] {
-		return items
-			.filter((item) => matchesFilter(item, filter))
-			.map((item) => ({
-				item,
-				nodes:
-					item.kind === "folder"
-						? buildViewNodes(item.children, filter)
-						: [],
-			}));
+		const nodes: TrashExplorerViewNode[] = [];
+
+		for (const item of items) {
+			const childNodes =
+				item.kind === "folder"
+					? buildViewNodes(item.children, filter)
+					: [];
+
+			if (childNodes.length || matchesFilter(item, filter)) {
+				nodes.push({ item, nodes: childNodes });
+			}
+		}
+
+		return nodes;
 	}
 
 	function matchesFilter(item: TrashItem, filter: string): boolean {
-		if (!filter || item.path.toLocaleUpperCase().includes(filter)) {
-			return true;
-		}
-
-		if (item.kind === "folder") {
-			return item.children.some((child) => matchesFilter(child, filter));
-		}
-
-		return false;
+		return !filter || item.path.toLocaleUpperCase().includes(filter);
 	}
 </script>
 
