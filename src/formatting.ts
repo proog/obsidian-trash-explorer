@@ -9,7 +9,15 @@ const units = [
 
 export function formatItemStats(item: TrashItem): string {
 	if (item.kind === "folder") {
-		return `${item.children.length} items`;
+		const fileCount = item.children.reduce(
+			(count, child) => (child.kind === "file" ? count + 1 : count),
+			0
+		);
+		const folderCount = item.children.length - fileCount;
+		const fileWord = fileCount === 1 ? "file" : "files";
+		const folderWord = folderCount === 1 ? "folder" : "folders";
+
+		return `${fileCount} ${fileWord}, ${folderCount} ${folderWord}`;
 	}
 
 	const bestUnit = units.reduce((best, unit) =>
