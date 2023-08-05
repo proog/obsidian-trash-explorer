@@ -17,7 +17,7 @@
 
 <div class="trash-item">
 	<div class="textcontainer">
-		<div class="name">{item.basename}</div>
+		<div class="name" aria-label={item.basename}>{item.basename}</div>
 		<div class="info">{itemStats}</div>
 	</div>
 	<div class="buttons">
