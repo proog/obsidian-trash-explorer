@@ -1,0 +1,1 @@
+Contents of another note

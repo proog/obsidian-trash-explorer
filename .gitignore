@@ -1,5 +1,5 @@
 # vscode
-.vscode 
+.vscode
 
 # Intellij
 *.iml
@@ -20,3 +20,17 @@ data.json
 
 # Exclude macOS Finder (System Explorer) View States
 .DS_Store
+
+# Playwright
+/test-results/
+/playwright-report/
+/blob-report/
+/playwright/.cache/
+
+/e2e-vault/.obsidian/workspace.json
+/e2e-vault/.obsidian/appearance.json
+/e2e-vault/.obsidian/hotkeys.json
+/e2e-vault/.obsidian/core-plugins.json
+/e2e-vault/.obsidian/core-plugins-migration.json
+/e2e-vault/.obsidian/plugins/obsidian-trash-explorer/
+/e2e-vault/.trash/

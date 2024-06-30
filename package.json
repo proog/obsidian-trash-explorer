@@ -7,12 +7,14 @@
 		"dev": "node esbuild.config.mjs",
 		"build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
 		"version": "node version-bump.mjs && git add manifest.json versions.json",
-		"test": "vitest"
+		"test": "vitest",
+		"e2e": "npm run build && playwright test"
 	},
 	"keywords": [],
 	"author": "Per Mortensen <per@permortensen.com>",
 	"license": "MIT",
 	"devDependencies": {
+		"@playwright/test": "^1.44.1",
 		"@tsconfig/svelte": "^5.0.0",
 		"@types/node": "^20.4.7",
 		"@typescript-eslint/eslint-plugin": "^6.2.1",
