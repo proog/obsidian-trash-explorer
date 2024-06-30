@@ -1,9 +1,9 @@
 import { Notice, Plugin } from "obsidian";
-import { Trash, TRASH_ROOT } from "./models";
+import { TRASH_ROOT, Trash } from "./models";
 import { ConfirmModal, TrashExplorerView, VIEW_TYPE } from "./view";
 
 export default class TrashExplorerPlugin extends Plugin {
-	private trash: Trash;
+	private trash!: Trash;
 
 	async onload() {
 		this.trash = new Trash(this.app.vault);
@@ -48,7 +48,7 @@ export default class TrashExplorerPlugin extends Plugin {
 
 		// Open a new leaf if it's not already open
 		if (!leaf) {
-			await this.app.workspace.getLeftLeaf(false).setViewState({
+			await this.app.workspace.getLeftLeaf(false)?.setViewState({
 				type: VIEW_TYPE,
 				active: true,
 			});
