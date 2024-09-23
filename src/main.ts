@@ -57,9 +57,9 @@ export default class TrashExplorerPlugin extends Plugin {
 		}
 
 		await this.trash.refresh();
-		await (leaf.view as TrashExplorerView).refresh();
 
-		this.app.workspace.revealLeaf(leaf);
+		await this.app.workspace.revealLeaf(leaf);
+		await (leaf.view as TrashExplorerView).refresh();
 	}
 
 	private async refreshOpenLeaves() {
