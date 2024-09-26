@@ -3,28 +3,10 @@ import fs from "node:fs/promises";
 import path from "node:path";
 import { _electron as electron } from "playwright";
 
-const appPath = "/Applications/Obsidian.app/Contents/MacOS/Obsidian";
+const appPath = path.resolve("./.obsidian-unpacked/main.js");
 const vaultPath = path.resolve("./e2e-vault");
 
 let app: ElectronApplication;
-
-test.beforeAll(async () => {
-	// Link plugin files to test vault
-	const pluginPath = path.join(
-		vaultPath,
-		".obsidian/plugins/obsidian-trash-explorer"
-	);
-
-	await fs.rm(pluginPath, { recursive: true, force: true });
-	await fs.mkdir(pluginPath, { recursive: true });
-
-	for (const file of ["manifest.json", "main.js"]) {
-		await fs.link(
-			path.resolve(path.join(".", file)),
-			path.join(pluginPath, file)
-		);
-	}
-});
 
 test.beforeEach(async () => {
 	// Restore .trash folder from template
@@ -39,13 +21,16 @@ test.beforeEach(async () => {
 	});
 
 	app = await electron.launch({
-		executablePath: appPath,
-		args: ["open", `obsidian://open?path=${encodeURIComponent(vaultPath)}`],
+		args: [
+			appPath,
+			"open",
+			`obsidian://open?path=${encodeURIComponent(vaultPath)}`,
+		],
 	});
 });
 
 test.afterEach(async () => {
-	await app.close();
+	await app?.close();
 });
 
 test("can open trash explorer view from ribbon", async () => {
