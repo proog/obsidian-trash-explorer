@@ -1,6 +1,6 @@
 {
 	"name": "obsidian-trash-explorer",
-	"version": "1.2.2",
+	"version": "1.2.3",
 	"description": "Restore and delete files from the Obsidian .trash folder",
 	"main": "main.js",
 	"type": "module",
