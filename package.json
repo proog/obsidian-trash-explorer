@@ -10,7 +10,8 @@
 		"version": "node version-bump.mjs && git add manifest.json versions.json",
 		"test": "vitest",
 		"e2e": "npm run build && playwright test",
-		"e2e-open-obsidian": "electron ./.obsidian-unpacked/main.js"
+		"e2e-open-obsidian": "electron ./.obsidian-unpacked/main.js",
+		"e2e-setup": "./e2e-setup.sh"
 	},
 	"keywords": [],
 	"author": "Per Mortensen <per@permortensen.com>",
