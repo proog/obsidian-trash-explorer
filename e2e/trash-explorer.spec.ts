@@ -112,3 +112,25 @@ test("can delete items from trash explorer view", async () => {
 	);
 	await expect(trashItem).not.toBeVisible();
 });
+
+test("can filter trashed items by name", async () => {
+	const window = await app.firstWindow();
+	const trashExplorerLeaf = window.locator(
+		".workspace-leaf-content[data-type=trash-explorer]"
+	);
+
+	await window.getByLabel("Open trash explorer", { exact: true }).click();
+
+	const trashItems = trashExplorerLeaf.locator(".trash-item");
+	await expect(trashItems).toHaveCount(5);
+
+	const searchInput = trashExplorerLeaf.getByPlaceholder("Filter by name...");
+	await searchInput.fill("fløde");
+
+	await expect(trashItems).toHaveCount(2);
+	await expect(trashItems.first()).toContainText("Recipes");
+	await expect(trashItems.last()).toContainText("Rødgrød med fløde.md");
+
+	await searchInput.clear();
+	await expect(trashItems).toHaveCount(5);
+});
