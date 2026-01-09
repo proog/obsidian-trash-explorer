@@ -1,4 +1,6 @@
 import { App, ItemView, Modal, Notice, Setting, WorkspaceLeaf } from "obsidian";
+import type { ComponentProps, SvelteComponent } from "svelte";
+import { createClassComponent } from "svelte/legacy";
 import { Trash, type TrashItem } from "./models";
 import TrashView from "./views/TrashView.svelte";
 
@@ -12,7 +14,10 @@ export const VIEW_TYPE = "trash-explorer";
 export class TrashExplorerView extends ItemView {
 	icon = "trash";
 	navigation = false;
-	private component: TrashView | undefined;
+
+	private component:
+		| SvelteComponent<ComponentProps<typeof TrashView>>
+		| undefined;
 
 	constructor(leaf: WorkspaceLeaf, private readonly trash: Trash) {
 		super(leaf);
@@ -27,21 +32,22 @@ export class TrashExplorerView extends ItemView {
 	}
 
 	async onOpen(): Promise<void> {
-		this.component = new TrashView({
+		this.component = createClassComponent({
+			component: TrashView,
 			target: this.contentEl,
-			props: { trash: this.trash },
-		});
-
-		this.component.$on("restore", async (event) => {
-			if (await this.restoreFile(event.detail)) {
-				this.refresh();
-			}
-		});
-
-		this.component.$on("delete", async (event) => {
-			if (await this.deleteFile(event.detail)) {
-				this.refresh();
-			}
+			props: {
+				trash: this.trash,
+				restoreItem: async (item: TrashItem) => {
+					if (await this.restoreFile(item)) {
+						this.refresh();
+					}
+				},
+				deleteItem: async (item: TrashItem) => {
+					if (await this.deleteFile(item)) {
+						this.refresh();
+					}
+				},
+			},
 		});
 
 		await this.refresh();

@@ -1,21 +1,25 @@
 <script lang="ts">
 	import type { Trash, TrashItem } from "../models";
-	import { type TrashExplorerViewNode } from "../view";
+	import type { TrashExplorerViewNode } from "../view";
 	import SearchInput from "./SearchInput.svelte";
 	import TrashItemView from "./TrashItemView.svelte";
 
-	export let trash: Trash;
+	interface Props {
+		trash: Trash;
+		restoreItem: (item: TrashItem) => void;
+		deleteItem: (item: TrashItem) => void;
+	}
 
-	let searchQuery = "";
+	let { trash, restoreItem, deleteItem }: Props = $props();
+	let searchQuery = $state("");
 
-	$: viewNodes = buildViewNodes(
-		trash.items,
-		searchQuery.trim().toLocaleUpperCase()
+	const viewNodes = $derived(
+		buildViewNodes(trash.items, searchQuery.trim().toLocaleUpperCase()),
 	);
 
 	function buildViewNodes(
 		items: TrashItem[],
-		filter: string
+		filter: string,
 	): TrashExplorerViewNode[] {
 		const nodes: TrashExplorerViewNode[] = [];
 
@@ -51,7 +55,7 @@
 
 		<div class="node-list">
 			{#each viewNodes as viewNode}
-				<TrashItemView {viewNode} on:restore on:delete />
+				<TrashItemView {viewNode} {restoreItem} {deleteItem} />
 			{:else}
 				<div class="pane-empty">Filter matched no files.</div>
 			{/each}

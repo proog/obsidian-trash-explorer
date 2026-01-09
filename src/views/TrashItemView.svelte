@@ -1,18 +1,19 @@
 <script lang="ts">
-	import { createEventDispatcher } from "svelte";
 	import { formatItemStats } from "../formatting";
 	import type { TrashItem } from "../models";
 	import type { TrashExplorerViewNode } from "../view";
+	import TrashItemView from "./TrashItemView.svelte";
 
-	export let viewNode: TrashExplorerViewNode;
+	interface Props {
+		viewNode: TrashExplorerViewNode;
+		restoreItem: (item: TrashItem) => void;
+		deleteItem: (item: TrashItem) => void;
+	}
 
-	$: item = viewNode.item;
-	$: itemStats = formatItemStats(item);
+	let { viewNode, restoreItem, deleteItem }: Props = $props();
 
-	const dispatch = createEventDispatcher<{
-		restore: TrashItem;
-		delete: TrashItem;
-	}>();
+	const item = $derived(viewNode.item);
+	const itemStats = $derived(formatItemStats(item));
 </script>
 
 <div class="trash-item">
@@ -21,7 +22,7 @@
 		<div class="info">{itemStats}</div>
 	</div>
 	<div class="buttons">
-		<button aria-label="Restore" on:click={() => dispatch("restore", item)}>
+		<button aria-label="Restore" onclick={() => restoreItem(item)}>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
 				width="24"
@@ -41,7 +42,7 @@
 		<button
 			aria-label="Delete permanently"
 			class="mod-warning"
-			on:click={() => dispatch("delete", item)}
+			onclick={() => deleteItem(item)}
 		>
 			<svg
 				xmlns="http://www.w3.org/2000/svg"
@@ -68,7 +69,7 @@
 {#if viewNode.nodes.length}
 	<div style="padding-left: 1em;">
 		{#each viewNode.nodes as childNode}
-			<svelte:self viewNode={childNode} on:restore on:delete />
+			<TrashItemView viewNode={childNode} {restoreItem} {deleteItem} />
 		{/each}
 	</div>
 {/if}

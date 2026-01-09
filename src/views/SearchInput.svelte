@@ -1,6 +1,10 @@
 <script lang="ts">
-	export let query = "";
-	export let placeholder = "";
+	interface Props {
+		query?: string;
+		placeholder?: string;
+	}
+
+	let { query = $bindable(""), placeholder = "" }: Props = $props();
 
 	function clear() {
 		query = "";
@@ -14,16 +18,16 @@
 		spellcheck="false"
 		{placeholder}
 		bind:value={query}
-		on:keydown={(e) => e.key === "Escape" && clear()}
+		onkeydown={(e) => e.key === "Escape" && clear()}
 	/>
 	<div
 		class="search-input-clear-button"
 		aria-label="Clear search"
 		role="button"
 		tabindex="-1"
-		on:keydown={(e) => e.key === "Enter" && clear()}
-		on:click={() => clear()}
-	/>
+		onkeydown={(e) => e.key === "Enter" && clear()}
+		onclick={() => clear()}
+	></div>
 </div>
 
 <style>
