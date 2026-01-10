@@ -54,7 +54,7 @@
 		</div>
 
 		<div class="node-list">
-			{#each viewNodes as viewNode}
+			{#each viewNodes as viewNode (viewNode.item.path)}
 				<TrashItemView {viewNode} {restoreItem} {deleteItem} />
 			{:else}
 				<div class="pane-empty">Filter matched no files.</div>

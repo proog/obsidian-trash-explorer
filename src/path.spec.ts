@@ -14,7 +14,7 @@ describe.each([
 	"/.trash/.foo.bar/.baz.txt.",
 ])("Fallback path functions are compatible with Node", async (input) => {
 	// Get the actual Node path module
-	const nodePath = (await vi.importActual("path")) as typeof import("path");
+	const nodePath = await vi.importActual<typeof import("path")>("path");
 
 	test("dirname", () => {
 		expect(dirname).not.toBe(nodePath.dirname);

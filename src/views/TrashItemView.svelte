@@ -68,7 +68,7 @@
 
 {#if viewNode.nodes.length}
 	<div style="padding-left: 1em;">
-		{#each viewNode.nodes as childNode}
+		{#each viewNode.nodes as childNode (childNode.item.path)}
 			<TrashItemView viewNode={childNode} {restoreItem} {deleteItem} />
 		{/each}
 	</div>

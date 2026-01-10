@@ -39,12 +39,12 @@ export class TrashExplorerView extends ItemView {
 				trash: this.trash,
 				restoreItem: async (item: TrashItem) => {
 					if (await this.restoreFile(item)) {
-						this.refresh();
+						await this.refresh();
 					}
 				},
 				deleteItem: async (item: TrashItem) => {
 					if (await this.deleteFile(item)) {
-						this.refresh();
+						await this.refresh();
 					}
 				},
 			},
@@ -53,12 +53,14 @@ export class TrashExplorerView extends ItemView {
 		await this.refresh();
 	}
 
-	async onClose(): Promise<void> {
+	onClose(): Promise<void> {
 		this.component?.$destroy();
+		return Promise.resolve();
 	}
 
-	async refresh(): Promise<void> {
+	refresh(): Promise<void> {
 		this.component?.$set({ trash: this.trash });
+		return Promise.resolve();
 	}
 
 	private async restoreFile(item: TrashItem): Promise<boolean> {
@@ -104,7 +106,7 @@ export class ConfirmModal extends Modal {
 		private readonly title: string,
 		private readonly message: string,
 		private readonly submitText: string,
-		private readonly onSubmit: () => void
+		private readonly onSubmit: () => Promise<void>
 	) {
 		super(app);
 	}
@@ -121,8 +123,8 @@ export class ConfirmModal extends Modal {
 				button
 					.setButtonText(this.submitText)
 					.setWarning()
-					.onClick(() => {
-						this.onSubmit();
+					.onClick(async () => {
+						await this.onSubmit();
 						this.close();
 					})
 			)

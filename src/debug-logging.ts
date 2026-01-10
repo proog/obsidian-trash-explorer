@@ -17,7 +17,7 @@ export function monkeyPatchConsoleOnMobile(plugin: Plugin) {
 			for (const message of messages) {
 				logs.push(String(message));
 			}
-			plugin.app.vault.adapter.write(logFile, logs.join(" "));
+			void plugin.app.vault.adapter.write(logFile, logs.join(" "));
 		};
 
 	console.debug = logMessages("debug");
