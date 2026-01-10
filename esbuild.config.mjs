@@ -1,7 +1,7 @@
-import builtins from "builtin-modules";
 import esbuild from "esbuild";
 import esbuildSvelte from "esbuild-svelte";
-import process from "process";
+import { builtinModules } from "node:module";
+import process from "node:process";
 import { sveltePreprocess } from "svelte-preprocess";
 
 const banner = `/*
@@ -32,7 +32,7 @@ const context = await esbuild.context({
 		"@lezer/common",
 		"@lezer/highlight",
 		"@lezer/lr",
-		...builtins,
+		...builtinModules,
 	],
 	format: "cjs",
 	target: "es2018",
